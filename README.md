@@ -1,53 +1,57 @@
-#**Finding Lane Lines on the Road** 
-[![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
+### Reflection
 
-<img src="examples/laneLines_thirdPass.jpg" width="480" alt="Combined Image" />
+### 1. Describe your pipeline. As part of the description, explain how you modified the draw_lines() function.
 
-Overview
----
+<!-- My pipeline consisted of 5 steps. First, I converted the images to grayscale, then I .... 
 
-When we drive, we use our eyes to decide where to go.  The lines on the road that show us where the lanes are act as our constant reference for where to steer the vehicle.  Naturally, one of the first things we would like to do in developing a self-driving car is to automatically detect lane lines using an algorithm.
+In order to draw a single line on the left and right lanes, I modified the draw_lines() function by ...
 
-In this project you will detect lane lines in images using Python and OpenCV.  OpenCV means "Open-Source Computer Vision", which is a package that has many useful tools for analyzing images.  
+If you'd like to include images to show how the pipeline works, here is how to include an image: 
 
-To complete the project, two files will be submitted: a file containing project code and a file containing a brief write up explaining your solution. We have included template files to be used both for the [code](https://github.com/udacity/CarND-LaneLines-P1/blob/master/P1.ipynb) and the [writeup](https://github.com/udacity/CarND-LaneLines-P1/blob/master/writeup_template.md).The code file is called P1.ipynb and the writeup template is writeup_template.md 
+![alt text][image1] -->
 
-To meet specifications in the project, take a look at the requirements in the [project rubric](https://review.udacity.com/#!/rubrics/322/view)
+The process for my pipeline is in two stages:
+
+1.  Detect lanes without lines drawn in
+2.  Draw in/extrapolate the lane lines
+
+With the first stage the steps are:
+
+1.  Firstly process using median blur to get rid of anything noisy
+2.  Convert anything that "looks" like yellow to white, to detect yellow lines better
+3.  Convert to grayscale
+4.  Apply gaussian blur
+5.  Apply canny edge detection
+6.  Subset by region, estimated by a trapezoid
+7.  Apply hough transform
+
+With drawing in the lines, I used the output from the previous stage
+
+1.  Taking only the hough transform, repeat with canny, being more aggressive with threshold
+2.  Dialate the solution to get "solid" lines
+3.  Repeat with canny again
+4.  Use hough transform to get the lines
+5.  Use a modified `draw_lines` function draw in and extrapolate the lines. 
+
+The new `draw_lines` function:
+
+1.  Uses clustering to determine which sets of points belongs with which  "line"
+2.  Uses `cv2.fitLine` to fit a line
+3.  Draws it based on the fitted line.
 
 
-Creating a Great Writeup
----
-For this project, a great writeup should provide a detailed response to the "Reflection" section of the [project rubric](https://review.udacity.com/#!/rubrics/322/view). There are three parts to the reflection:
+### 2. Identify potential shortcomings with your current pipeline
 
-1. Describe the pipeline
-
-2. Identify any shortcomings
-
-3. Suggest possible improvements
-
-We encourage using images in your writeup to demonstrate how your pipeline works.  
-
-All that said, please be concise!  We're not looking for you to write a book here: just a brief description.
-
-You're not required to use markdown for your writeup.  If you use another method please just submit a pdf of your writeup. Here is a link to a [writeup template file](https://github.com/udacity/CarND-LaneLines-P1/blob/master/writeup_template.md). 
+The lane line markings are not as smooth as the example, and have a tendency of jumping all over the place. 
 
 
-The Project
----
 
-## If you have already installed the [CarND Term1 Starter Kit](https://github.com/udacity/CarND-Term1-Starter-Kit/blob/master/README.md) you should be good to go!   If not, you should install the starter kit to get started on this project. ##
+### 3. Suggest possible improvements to your pipeline
 
-**Step 1:** Set up the [CarND Term1 Starter Kit](https://classroom.udacity.com/nanodegrees/nd013/parts/fbf77062-5703-404e-b60c-95b78b2f3f9e/modules/83ec35ee-1e02-48a5-bdb7-d244bd47c2dc/lessons/8c82408b-a217-4d09-b81d-1bda4c6380ef/concepts/4f1870e0-3849-43e4-b670-12e6f2d4b7a7) if you haven't already.
+Since we use clustering iteratively to determine the line segment groupings it sometimes gets it wrong. It might be better to either:
+*  Keep history, so that it gets better over time
+*  Use a rule based approach so that it is consistent
 
-**Step 2:** Open the code in a Jupyter Notebook
+Generally understanding roughly the location of lines in the previous frame should help inform where new lines are now at!
 
-You will complete the project code in a Jupyter notebook.  If you are unfamiliar with Jupyter Notebooks, check out <A HREF="https://www.packtpub.com/books/content/basics-jupyter-notebook-and-python" target="_blank">Cyrille Rossant's Basics of Jupyter Notebook and Python</A> to get started.
-
-Jupyter is an Ipython notebook where you can run blocks of code and see results interactively.  All the code for this project is contained in a Jupyter notebook. To start Jupyter in your browser, use terminal to navigate to your project directory and then run the following command at the terminal prompt (be sure you've activated your Python 3 carnd-term1 environment as described in the [CarND Term1 Starter Kit](https://github.com/udacity/CarND-Term1-Starter-Kit/blob/master/README.md) installation instructions!):
-
-`> jupyter notebook`
-
-A browser window will appear showing the contents of the current directory.  Click on the file called "P1.ipynb".  Another browser window will appear displaying the notebook.  Follow the instructions in the notebook to complete the project.  
-
-**Step 3:** Complete the project and submit both the Ipython notebook and the project writeup
 
